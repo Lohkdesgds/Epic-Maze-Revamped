@@ -1,0 +1,174 @@
+if (fabs(min_dist[t][0]) < blocksize_rel[0]*0.99 &&
+									fabs(min_dist[t][1]) < blocksize_rel[1]*0.99) // danger
+								{
+									al_draw_filled_circle(((posrel[0] - campos[0] - min_dist[t][0])*0.5 + 0.5) * data.usedx, ((posrel[1] - campos[1] - min_dist[t][1])*0.5 + 0.5) * data.usedy, 27.0, al_map_rgb(255, 0, 0));
+
+									int mult_here_h = min_dist[t][1] / fabs(min_dist[t][1]); // -1 or 1
+									int mult_here_v = min_dist[t][0] / fabs(min_dist[t][0]); // -1 or 1
+
+									double combo[2];
+
+									if (mult_here_h == 1)	combo[1] = 0.0; // south
+									else					combo[1] = 180.0; // north
+									if (mult_here_v == 1)	combo[0] = 90.0; // east
+									else					combo[0] = 270.0; // west
+
+									plrrot = (combo[0] + combo[1]) / 2.0;
+								}
+
+								else if (fabs(min_dist[t][0]) < blocksize_rel[0] + playersiz_rel[0] &&
+									fabs(min_dist[t][1]) < blocksize_rel[1] + playersiz_rel[1]) // can do effect
+								{
+									collisions_approved++;
+									al_draw_filled_circle(((posrel[0] - campos[0] - min_dist[t][0])*0.5 + 0.5) * data.usedx, ((posrel[1] - campos[1] - min_dist[t][1])*0.5 + 0.5) * data.usedy, 30.0, al_map_rgb(255, 255, 255));
+
+									int opt = 0; // times to add 90
+									double preciseang = plrrot;
+
+									int mult_here_h = min_dist[t][1] / fabs(min_dist[t][1]); // -1 or 1
+									int mult_here_v = min_dist[t][0] / fabs(min_dist[t][0]); // -1 or 1
+
+																							 /*if (mult_here_h == 1) posrel[1] += (playersiz_rel[1] + blocksize_rel[1] - fabs(min_dist[t][1])*0.97);
+																							 else posrel[0] += (playersiz_rel[0] + blocksize_rel[0] - fabs(min_dist[t][0])*0.97);
+																							 if (mult_here_v == 1) posrel[1] -= (playersiz_rel[1] + blocksize_rel[1] - fabs(min_dist[t][1])*0.97);
+																							 else posrel[0] -= (playersiz_rel[0] + blocksize_rel[0] - fabs(min_dist[t][0])*0.97);*/
+
+									if (rand()%2) // fabs(min_dist[t][0]) < fabs(min_dist[t][1])
+									{
+										if (mult_here_h == 1) { // south
+											opt = 0;
+										}
+										else { // north
+											opt = 2;
+										}
+									}
+									else {
+										if (mult_here_v == 1) { // east
+											opt = 1;
+										}
+										else { // west
+											opt = 3;
+										}
+									}
+
+									preciseang += 90.0*opt;
+									while (preciseang < 0.0) preciseang += 360.0;
+									while (preciseang > 360.0) preciseang -= 360.0;
+
+									preciseang += 90.0;
+									if (preciseang > 360.0) preciseang -= 360.0;
+
+									if (preciseang > 180.0) {
+										preciseang = 90.0;
+									}
+
+
+									// 90 == block |<----- user
+									//             |_| ang
+									//             |
+									if (preciseang > 90.0)
+									{
+										preciseang -= 2.0*(preciseang - 90.0);
+										preciseang += 180.0;
+									}
+									else {
+										preciseang += 2.0*(90.0 - preciseang);
+										preciseang += 180.0;
+									}
+
+									// thinking about block north, player south \/
+
+									/*double nowang = 180.0 - preciseang;
+									if (nowang < 0.0) nowang += 180.0;*/
+
+									possiblerots[items_got] = preciseang - 90.0*(opt + 1);
+									while (possiblerots[items_got] < 0.0) possiblerots[items_got] += 360.0;
+									items_got++;
+
+									speed *= 0.5;
+									if (speed < 0.001) speed = 0.001;
+									//al_draw_textf(font, al_map_rgb(25, 0, 5), ((posrel[0] - campos[0] - min_dist[t][0])*0.5 + 0.5) * data.usedx, ((posrel[1] - campos[1] - min_dist[t][1] + 0.03)*0.5 + 0.5) * data.usedy, ALLEGRO_ALIGN_CENTER, "%.3f", possiblerots[items_got]); // must go to
+								}
+								if (collisions_approved == 1)
+								{
+									cases_times_mult += multiply;
+								}
+								else if (collisions_approved >= 2 || cases_times_mult > 0.4) // chaos
+								{
+									bool gotone = false;
+
+									for (double mtp = 0.5; mtp < 6.0 && !gotone; mtp += 0.5) {
+										for (int py = ((posrel[1] * 0.5 + 0.5)*9.0) - mtp; !gotone && py < ((posrel[1] * 0.5 + 0.5)*9.0) + mtp; py++)
+										{
+											for (int px = ((posrel[0] * 0.5 + 0.5)*15.0) - mtp; !gotone && px < ((posrel[0] * 0.5 + 0.5)*15.0) + mtp; px++)
+											{
+												if (map.readpos(px, py) > 0)
+												{
+													double xx, yy;
+													xx = (px * (blocksize_rel[0]) - 0.5) * 2.0 - campos[0];
+													yy = (py * (blocksize_rel[1]) - 0.5) * 2.0 - campos[1];
+
+													double playerquinas[4][2];
+													double distances[4];
+
+													playerquinas[0][0] = posrel[0] - playersiz_rel[0]; // X *
+													playerquinas[0][1] = posrel[1] + playersiz_rel[1]; // * *
+
+													playerquinas[1][0] = posrel[0] + playersiz_rel[0]; // * X
+													playerquinas[1][1] = posrel[1] + playersiz_rel[1]; // * *
+
+													playerquinas[2][0] = posrel[0] + playersiz_rel[0]; // * *
+													playerquinas[2][1] = posrel[1] - playersiz_rel[1]; // * X
+
+													playerquinas[3][0] = posrel[0] - playersiz_rel[0]; // * *
+													playerquinas[3][1] = posrel[1] - playersiz_rel[1]; // X *
+
+													distances[0] = sqrt(pow(playerquinas[0][0] - xx, 2.0) + pow(playerquinas[0][1] - yy, 2.0));
+													distances[1] = sqrt(pow(playerquinas[1][0] - xx, 2.0) + pow(playerquinas[1][1] - yy, 2.0));
+													distances[2] = sqrt(pow(playerquinas[2][0] - xx, 2.0) + pow(playerquinas[2][1] - yy, 2.0));
+													distances[3] = sqrt(pow(playerquinas[3][0] - xx, 2.0) + pow(playerquinas[3][1] - yy, 2.0));
+
+													double mino = 9999.0;
+													int choice = -1;
+													for (int p = 0; p < 4; p++)
+													{
+														if (distances[p] < mino) {
+															mino = distances[p];
+															choice = p;
+														}
+													}
+													switch (choice) {
+													case 0:
+														plrrot = 225.0;
+														break;
+													case 1:
+														plrrot = 45.0;
+														break;
+													case 2:
+														plrrot = 135.0;
+														break;
+													case 3:
+														plrrot = 315.0;
+														break;
+													}
+													if (speed < 0.002) speed = 0.002;
+													way = -1;
+													items_got = 0;
+													t = 9;
+													gotone = true;
+												}
+											}
+										}
+									}
+									if (!gotone)
+									{
+										posrel[0] = (0.2 * (rand() % 10) - 1.0);
+										posrel[1] = (0.2 * (rand() % 10) - 1.0);
+									}
+									else {
+										cases_times_mult = 0.0;
+									}
+								}
+								else {
+									cases_times_mult = 0.0;
+								}

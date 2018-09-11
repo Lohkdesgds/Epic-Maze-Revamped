@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2047
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Epic Maze Revamped Allegro Ed", "Epic Maze Revamped Allegro Ed\Epic Maze Revamped Allegro Ed.vcxproj", "{34899382-AEBC-4143-BDCE-C8906C9C7E57}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Epic Maze Orig", "Epic Maze Orig\Epic Maze Orig.vcxproj", "{8EB3BF53-D5FA-4396-982A-E475ADCE55B6}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Epic Maze Revamped 2018-09", "Epic Maze Revamped 2018-09\Epic Maze Revamped 2018-09.vcxproj", "{B5DF3195-8F96-4370-A8D4-0E3ACFCA267F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -13,14 +15,22 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{34899382-AEBC-4143-BDCE-C8906C9C7E57}.Debug|x64.ActiveCfg = Debug|x64
-		{34899382-AEBC-4143-BDCE-C8906C9C7E57}.Debug|x64.Build.0 = Debug|x64
-		{34899382-AEBC-4143-BDCE-C8906C9C7E57}.Debug|x86.ActiveCfg = Debug|Win32
-		{34899382-AEBC-4143-BDCE-C8906C9C7E57}.Debug|x86.Build.0 = Debug|Win32
-		{34899382-AEBC-4143-BDCE-C8906C9C7E57}.Release|x64.ActiveCfg = Release|x64
-		{34899382-AEBC-4143-BDCE-C8906C9C7E57}.Release|x64.Build.0 = Release|x64
-		{34899382-AEBC-4143-BDCE-C8906C9C7E57}.Release|x86.ActiveCfg = Release|Win32
-		{34899382-AEBC-4143-BDCE-C8906C9C7E57}.Release|x86.Build.0 = Release|Win32
+		{8EB3BF53-D5FA-4396-982A-E475ADCE55B6}.Debug|x64.ActiveCfg = Debug|x64
+		{8EB3BF53-D5FA-4396-982A-E475ADCE55B6}.Debug|x64.Build.0 = Debug|x64
+		{8EB3BF53-D5FA-4396-982A-E475ADCE55B6}.Debug|x86.ActiveCfg = Debug|Win32
+		{8EB3BF53-D5FA-4396-982A-E475ADCE55B6}.Debug|x86.Build.0 = Debug|Win32
+		{8EB3BF53-D5FA-4396-982A-E475ADCE55B6}.Release|x64.ActiveCfg = Release|x64
+		{8EB3BF53-D5FA-4396-982A-E475ADCE55B6}.Release|x64.Build.0 = Release|x64
+		{8EB3BF53-D5FA-4396-982A-E475ADCE55B6}.Release|x86.ActiveCfg = Release|Win32
+		{8EB3BF53-D5FA-4396-982A-E475ADCE55B6}.Release|x86.Build.0 = Release|Win32
+		{B5DF3195-8F96-4370-A8D4-0E3ACFCA267F}.Debug|x64.ActiveCfg = Debug|x64
+		{B5DF3195-8F96-4370-A8D4-0E3ACFCA267F}.Debug|x64.Build.0 = Debug|x64
+		{B5DF3195-8F96-4370-A8D4-0E3ACFCA267F}.Debug|x86.ActiveCfg = Debug|Win32
+		{B5DF3195-8F96-4370-A8D4-0E3ACFCA267F}.Debug|x86.Build.0 = Debug|Win32
+		{B5DF3195-8F96-4370-A8D4-0E3ACFCA267F}.Release|x64.ActiveCfg = Release|x64
+		{B5DF3195-8F96-4370-A8D4-0E3ACFCA267F}.Release|x64.Build.0 = Release|x64
+		{B5DF3195-8F96-4370-A8D4-0E3ACFCA267F}.Release|x86.ActiveCfg = Release|Win32
+		{B5DF3195-8F96-4370-A8D4-0E3ACFCA267F}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

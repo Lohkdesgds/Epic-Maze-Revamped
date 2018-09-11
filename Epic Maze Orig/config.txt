@@ -1,0 +1,3 @@
+#Configuration_file
+fullscreen= false
+screensize= 1280x720
