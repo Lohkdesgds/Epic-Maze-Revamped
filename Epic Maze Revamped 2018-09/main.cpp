@@ -10,7 +10,7 @@ void freezeup();
 
 int main()
 {
-	//getTime(); // set first value
+	getTime(); // set first value
 	LSW::EpicMazeR::displayer maindisp;
 
 	std::cout << "#####[{> EpicMaze Revamped V2 <}]#####" << std::endl;

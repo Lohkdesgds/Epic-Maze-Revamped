@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdarg.h>  
 #include <Windows.h>
+#include <cmath>
+#include <chrono>
 
 // define or undef to use ALLEGRO or SFML
 #define USING_ALLEGRO

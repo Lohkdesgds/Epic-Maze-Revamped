@@ -409,6 +409,8 @@ namespace LSW {
 						int vars[2] = { data.usedx, data.usedy };
 						float multipl_mult = 1;
 						int multipl = 10;
+						lsw_mode mn = data.modes.modes[data.modes.using_rn];
+						int lmn = data.modes.using_rn;
 						// enabled_alternative_mode
 						// infinite_map
 							
@@ -429,26 +431,21 @@ namespace LSW {
 								if (!selected) option_on_screen--;
 								else {
 									if (option_on_screen == 0 || option_on_screen == 1) vars[option_on_screen] += multipl * multipl_mult;
-
 									if (option_on_screen == -1) multipl += 10;
-									if (option_on_screen ==  0) vars[1] = vars[0] * 9.0 / 16.0;
-									if (option_on_screen ==  1) vars[0] = vars[1] * 16.0 / 9.0;
-									if (option_on_screen ==  2) data.fixed_fps += multipl * multipl_mult;
+									if (option_on_screen ==  2) data.modes.using_rn += multipl * multipl_mult * 0.1 * ((multipl_mult < 1.0 && multipl < 100) ? 10.0 : 1.0);
+									if (option_on_screen ==  3) data.fixed_fps += multipl * multipl_mult;
 								}
 								break;
 							case ALLEGRO_KEY_DOWN:
 								if (!selected) option_on_screen++;
 								else {
 									if (option_on_screen == 0 || option_on_screen == 1) vars[option_on_screen] -= multipl* multipl_mult;
-
 									if (option_on_screen == -1) multipl -= 10;
-									if (option_on_screen == 0) vars[1] = vars[0] * 9.0 / 16.0;
-									if (option_on_screen == 1) vars[0] = vars[1] * 16.0 / 9.0;
-									if (option_on_screen == 2) data.fixed_fps -= multipl * multipl_mult;
+									if (option_on_screen == 2) data.modes.using_rn -= multipl * multipl_mult * 0.1 * ((multipl_mult < 1.0 && multipl < 100) ? 10.0 : 1.0);
+									if (option_on_screen == 3) data.fixed_fps -= multipl * multipl_mult;
 								}
 								break;
 							case ALLEGRO_KEY_ENTER:
-								clearTo(color(0, 0, 0));
 								selected = !selected;
 								break;
 							case ALLEGRO_KEY_ESCAPE:
@@ -469,16 +466,75 @@ namespace LSW {
 								break;
 							}
 
+							if (selected)
+							{
+								switch (option_on_screen)
+								{
+								case 4:
+									enabled_alternative_mode = !enabled_alternative_mode;
+									selected = false;
+									break;
+								case 5:
+									infinite_map = !infinite_map;
+									selected = false;
+									break;
+								case 6:
+									if (++data.display_mode_draw > 2) data.display_mode_draw = 0;
+									selected = false;
+									break;
+								case 7:
+									selected = false;
+									new_isfull = !new_isfull;
+									break;
+								case 8:
+									selected = false;
+									if ((new_isfull != isFullscreen) || (lmn != data.modes.using_rn))
+									{
+										if (lmn != data.modes.using_rn)
+										{
+											data.usedx = mn.x;
+											data.usedy = mn.y;											
+										}
+										else {
+											data.usedx = vars[0];
+											data.usedy = vars[1];
+										}
+										fixProportion(data.usedx, data.usedy);
+										isFullscreen = new_isfull;
+										data.now = LSW_S_INITIALIZING;
+										return 1;
+									}
+									resizeBufTo(vars[0], vars[1]);
+									font = data.data_control.get(LSW_FONT_DEJAVUSANS);
+									break;
+								case 9:
+									choosing = false;
+									break;
+								}
+							}
+
+
 							if ((data.fixed_fps < 10 && data.fixed_fps >= 0) || data.fixed_fps < -1) data.fixed_fps = 10;
 							if (data.fixed_fps >= 250) data.fixed_fps = -1;
 							if (multipl < 10) multipl = 10;
-							if (option_on_screen < -1) option_on_screen = 8;
-							if (option_on_screen > 8) option_on_screen = -1;
-							if (vars[0] < 640) vars[0] += 10;
-							if (vars[1] < 480) vars[1] += 10;
+							if (option_on_screen < -1) option_on_screen = 9;
+							if (option_on_screen > 9) option_on_screen = -1;
+							if (vars[0] < 853) vars[0] = 853;
+							if (vars[1] < 480) vars[1] = 480;
+							if (option_on_screen == 0 && selected) vars[1] = vars[0] * 9.0 / 16.0;
+							if (option_on_screen == 1 && selected) vars[0] = vars[1] * 16.0 / 9.0;
+							if (data.modes.using_rn >= data.modes.modes.size()) data.modes.using_rn = 0;
+							if (data.modes.using_rn < 0)
+								data.modes.using_rn = ((int)data.modes.modes.size() - 1);
 
+							mn = data.modes.modes[data.modes.using_rn];
 							y_off_motion -= multiply * 0.2 * (y_off_motion - option_on_screen*0.05);
 
+							if (option_on_screen == 2 && selected)
+							{
+								vars[0] = mn.x;
+								vars[1] = mn.y;
+							}
 
 							clearTo(color(0, 0, 0));
 
@@ -505,8 +561,14 @@ namespace LSW {
 							opt_being_tested++;
 							y_help += y_eq_001 * 4.0;
 
-							drawText(font, ((option_on_screen == opt_being_tested) ? (selected ? color(1, 0, 0) : color(1, 1, 0)) : color(0.5, 0.5, 0)),
+							drawText(font, ((option_on_screen == opt_being_tested) ? (selected ? color(1, 0, 0) : color(1, 1, 0)) : color(0.5, 0.5, 0.5)),
 								0.5*data.usedx, y_help, ALLEGRO_ALIGN_CENTER, "%c Height: %d %c", ((option_on_screen == opt_being_tested) ? '>' : '-'), vars[1], ((option_on_screen == opt_being_tested) ? '<' : '-'));
+
+							opt_being_tested++;
+							y_help += y_eq_001 * 4.0;
+
+							drawText(font, ((option_on_screen == opt_being_tested) ? (selected ? color(1, 0, 0) : color(1, 1, 0)) : color(0.5, 0.5, 0.5)),
+								0.5*data.usedx, y_help, ALLEGRO_ALIGN_CENTER, "%c DISPLAY RES: %dx%d@%d[#%d/%u] %c", ((option_on_screen == opt_being_tested) ? '>' : '-'), mn.x, mn.y, mn.hz,data.modes.using_rn, data.modes.modes.size(), ((option_on_screen == opt_being_tested) ? '<' : '-'));
 
 							opt_being_tested++;
 							y_help += y_eq_001 * 4.0;
@@ -570,46 +632,8 @@ namespace LSW {
 							flip();
 
 							multiply = multiplier();
-
-							if (selected)
-							{
-								switch (option_on_screen)
-								{
-								case 3:
-									enabled_alternative_mode = !enabled_alternative_mode;
-									selected = false;
-									break;
-								case 4:
-									infinite_map = !infinite_map;
-									selected = false;
-									break;
-								case 5:
-									if (++data.display_mode_draw > 2) data.display_mode_draw = 0;
-									selected = false;
-									break;
-								case 6:
-									selected = false;
-									new_isfull = !new_isfull;
-									break;
-								case 7:
-									selected = false;
-									if (new_isfull != isFullscreen)
-									{
-										data.usedx = vars[0];
-										data.usedy = vars[1];
-										isFullscreen = new_isfull;
-										data.now = LSW_S_INITIALIZING;
-										return 1;
-									}
-									resizeBufTo(vars[0], vars[1]);
-									font = data.data_control.get(LSW_FONT_DEJAVUSANS);
-									break;
-								case 8:
-									choosing = false;
-									break;
-								}
-							}
 						}
+						data.modes.using_rn = lmn;
 					}
 
 					data.now = LSW_S_MENU;
@@ -1117,7 +1141,6 @@ namespace LSW {
 					multiply = 0.0;
 
 					rn.collision_controller = new std::thread(_thr_collisionwork_ext, &rn, this);
-					while (rn.istestingcollision == -1); // thread has to start
 
 					if (infinite_map) map2.init();
 
@@ -1125,8 +1148,8 @@ namespace LSW {
 
 					while (rn.playin)
 					{
-						rn.main_asks_for_pause = 1;
-						while (rn.istestingcollision != 0);
+						rn.change_oneanother.lock();
+						rn.beingusedby = 0;
 
 						//gr = rn; // copies pos and values to draw;
 						
@@ -1160,7 +1183,8 @@ namespace LSW {
 									gr.paused = false;
 
 									//rn = gr;
-									rn.main_asks_for_pause = 0;
+									rn.beingusedby = -1;
+									rn.change_oneanother.unlock();
 									rn.collision_controller->join();
 									delete rn.collision_controller;
 									rn.collision_controller = nullptr;
@@ -1176,7 +1200,8 @@ namespace LSW {
 									gr.distance_taken = -1.0;
 
 									//rn = gr;
-									rn.main_asks_for_pause = 0;
+									rn.beingusedby = -1;
+									rn.change_oneanother.unlock();
 									rn.collision_controller->join();
 									delete rn.collision_controller;
 									rn.collision_controller = nullptr;
@@ -1190,7 +1215,10 @@ namespace LSW {
 
 						
 						//rn = gr;
-						rn.main_asks_for_pause = 0;
+						if (data.if_playin->beingusedby == 0) {
+							data.if_playin->change_oneanother.try_lock();
+							data.if_playin->change_oneanother.unlock();
+						}
 
 						/* * * * * * * DRAWNING * * * * * * */
 						{
@@ -1473,22 +1501,24 @@ namespace LSW {
 			float _scale_x, _scale_y;
 			_scale_x = (1.0f*data.usedx / base_res[0]) * scale_x;
 			_scale_y = (1.0f*data.usedy / base_res[1]) * scale_y;
+			if (_scale_x == 0) _scale_x = 1.0;
+			if (_scale_y == 0) _scale_y = 1.0;
 			int sx_b = getBitmapWidth(chosen);
 			int sy_b = getBitmapHeight(chosen);
 			if (pos_center_bitmap_x < 0.0 || pos_center_bitmap_y < 0.0)
 			{
-				pos_center_bitmap_x = (sx_b / 2.0);
-				pos_center_bitmap_y = (sy_b / 2.0);
+				pos_center_bitmap_x = (1.0 * sx_b / 2.0);
+				pos_center_bitmap_y = (1.0 * sy_b / 2.0);
 			}
 			float var1, var2; // posx, posy
 			if (used_x_p > 0 && used_y_p > 0)
 			{
-				var1 = used_x_p * ((pos_related_x + 1.0) / 2.0);
-				var2 = used_y_p * ((pos_related_y + 1.0) / 2.0);
+				var1 = 1.0 * used_x_p * ((pos_related_x + 1.0) / 2.0);
+				var2 = 1.0 * used_y_p * ((pos_related_y + 1.0) / 2.0);
 			}
 			else {
-				var1 = data.usedx * ((pos_related_x + 1.0) / 2.0);
-				var2 = data.usedy * ((pos_related_y + 1.0) / 2.0);
+				var1 = 1.0 * data.usedx * ((pos_related_x + 1.0) / 2.0);
+				var2 = 1.0 * data.usedy * ((pos_related_y + 1.0) / 2.0);
 			}
 
 			if (!blend) {
@@ -1535,7 +1565,7 @@ namespace LSW {
 
 			defineOut(data.transparency);
 
-			al_draw_filled_rectangle(0, 0, data.usedx, data.usedy, color(0, 0, 0));
+			al_draw_filled_rectangle(0, 0, getBitmapWidth(data.transparency), getBitmapHeight(data.transparency), color(0, 0, 0));
 
 			al_set_blender(ALLEGRO_ADD, ALLEGRO_ONE, ALLEGRO_ZERO);
 
@@ -1548,7 +1578,7 @@ namespace LSW {
 
 			fixLoad();
 
-			drawIt(data.transparency, 0, 0, 0);
+			drawIt(data.transparency, 0, 0, 0, 0.0, 0.0);// , -1, -1, -1, -1, -1, color(1, 0, 0), false, getDisplayWidth(data.display), getDisplayHeight(data.display));
 			//al_draw_bitmap(data.transparency, 0, 0, 0);
 		}
 		void displayer::bganim(const double mult)
@@ -1663,8 +1693,8 @@ namespace LSW {
 
 		void displayer::_thr_collision_work(gameplay_needs& gr)
 		{
-			gr.istestingcollision = 1;
-			while (gr.main_asks_for_pause != 0);
+			gr.change_oneanother.lock();
+			gr.beingusedby = 1;
 
 			double multiply = (1.0 / gr.collision_tps) * 60.0;
 			
@@ -1991,7 +2021,8 @@ namespace LSW {
 				}
 			}
 
-			gr.istestingcollision = 0;
+			gr.beingusedby = -1;
+			gr.change_oneanother.unlock();
 		}
 
 		// degrees
@@ -2006,24 +2037,77 @@ namespace LSW {
 		}
 		void displayer::fixFPS(const double antes, const double agora, const double fps_max)
 		{
-			if (agora - antes < 1.0 / fps_max && ((1.0 / fps_max) - (agora - antes))>0)
+			if (agora - antes < 1.0 / fps_max && ((1.0 / fps_max) - (agora - antes)) > 0.0)
 			{
 				restFor((1.0 / fps_max) - (agora - antes));
 			}
+		}
+		const bool displayer::loadModes(const int modes)
+		{
+			data.modes.modes.clear();
+
+			int nva = al_get_num_video_adapters();
+			if (nva < 1) return false;
+
+			al_set_new_display_flags(modes);
+			int num_modes = al_get_num_display_modes();
+			for (int j = 0; j < num_modes; ++j) {
+				ALLEGRO_DISPLAY_MODE admode;
+				if (al_get_display_mode(j, &admode) == &admode) {
+					lsw_mode mod;
+					mod.x = admode.width;
+					mod.y = admode.height;
+					mod.hz = admode.refresh_rate;
+					bool push = true;
+					for (auto& i : data.modes.modes) {
+						if (mod.x == i.x && mod.y == i.y && mod.hz == i.hz) {
+							push = false;
+							break;
+						}
+					}
+					if (push) data.modes.modes.push_back(mod);
+
+				}
+			}
+			return true;
 		}
 		const bool displayer::init()
 		{
 			if (data.loaded) return true;
 			data.muu.lock();
 
-			ALLEGRO_DISPLAY_MODE full_h;
-			al_get_display_mode(al_get_num_display_modes() - 1, &full_h);
-			data.full_a[0] = full_h.width;
-			data.full_a[1] = full_h.height;
+			int flags = (isFullscreen ? ALLEGRO_FULLSCREEN : (ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE)) | ALLEGRO_OPENGL | ALLEGRO_OPENGL_3_0;
+
+			int assistance = 0;
+			lsw_mode mode_selected;
+			//data.modes.using_rn = 0;
+
+			if (data.modes.modes.size() == 0)
+			{
+				if (!loadModes(flags)) return false;
+				if (data.modes.modes.size() == 0) return false;
+
+
+				for (auto& i : data.modes.modes)
+				{
+					if ((i.x > mode_selected.x || i.y > mode_selected.y) || (i.x == mode_selected.x && i.y == mode_selected.y && i.hz > mode_selected.hz))
+					{
+						mode_selected = i;
+						data.modes.using_rn = assistance;
+					}
+					assistance++;
+				}
+			}
+			else {
+				mode_selected = data.modes.modes[data.modes.using_rn];
+			}
+			data.full_a[0] = mode_selected.x;
+			data.full_a[1] = mode_selected.y;
 
 			al_set_new_display_option(ALLEGRO_AUTO_CONVERT_BITMAPS, 1, ALLEGRO_DONTCARE);
-			al_set_new_display_flags((isFullscreen ? ALLEGRO_FULLSCREEN : (ALLEGRO_WINDOWED | ALLEGRO_RESIZABLE)) | ALLEGRO_OPENGL | ALLEGRO_OPENGL_3_0);
+			al_set_new_display_flags(flags);
 			al_set_new_display_option(ALLEGRO_VSYNC, 2, ALLEGRO_SUGGEST);
+			al_set_new_display_refresh_rate(mode_selected.hz);
 
 			if (!isFullscreen)
 			{
@@ -2045,13 +2129,8 @@ namespace LSW {
 
 			data.usedx = data.full_a[0];
 			data.usedy = data.full_a[1];
-			float temp_f = 1.0*data.usedy / data.usedx;
-			if (temp_f > (16.0 / 9)) {
-				data.usedx = data.usedy * 16.0 / 9;
-			}
-			else {
-				data.usedy = data.usedx * 9.0 / 16;
-			}
+
+			fixProportion(data.usedx, data.usedy);
 
 			data.buffer = createTexture(data.usedx, data.usedy);
 			if (!data.buffer) {
@@ -2143,7 +2222,7 @@ namespace LSW {
 				if (data.fixed_fps > 0 && data.fixed_fps < 250) fixFPS(data.lastdraw, getTime(), data.fixed_fps);
 				double noww = getTime();
 
-				data.fps = (data.fps * 2 + (1.0 / (1.0*noww - data.lastdraw))) / 3.0;
+				data.fps = 0.01 + (data.fps * 2 + (1.0 / (1.0*noww - data.lastdraw))) / 3.0;
 				data.lastdraw = noww;
 
 				double var_b = 10.0 / data.fps;
@@ -2258,6 +2337,7 @@ namespace LSW {
 			//al_set_target_bitmap(data.buffer);
 			//data.tickCount = GetTickCount64() - data.lastC;
 
+			defineOut(data.buffer);
 			if (!data.evm.keepdisplayOn()) {
 				deinitAll();
 				exit(0);
@@ -2295,10 +2375,14 @@ namespace LSW {
 			if (!data.loaded) return;
 			data.muu.lock();
 
+
 			if (data.if_playin)
 			{
+				if (data.if_playin->beingusedby == 0) {
+					data.if_playin->change_oneanother.try_lock();
+					data.if_playin->change_oneanother.unlock();
+				}
 				gameplay_needs& rn = *data.if_playin;
-				rn.main_asks_for_pause = 0;
 				rn.playin = false;
 				rn.collision_controller->join();
 				delete rn.collision_controller;
@@ -2379,7 +2463,6 @@ namespace LSW {
 				throw "FAILED THR COLLISION GAME_PLAY";
 				exit(0);
 			}
-			gr->istestingcollision = 0;
 			gr->collision_tps = 90.0;
 
 			lsw_event_qu ev_qu = al_create_event_queue();
@@ -2391,7 +2474,7 @@ namespace LSW {
 
 			while (gr->playin)
 			{
-				/*if ((gr->nowFps - gr->collision_tps > gr->collision_tps*0.10) || (gr->collision_tps - gr->nowFps > gr->collision_tps*0.40 && gr->nowFps > 90.0))
+				if ((gr->nowFps - gr->collision_tps > gr->collision_tps*0.10) || (gr->collision_tps - gr->nowFps > gr->collision_tps*0.40 && gr->nowFps > 90.0))
 				{
 					gr->collision_tps = gr->nowFps+30;
 					al_unregister_event_source(ev_qu, al_get_timer_event_source(timar));
@@ -2400,7 +2483,7 @@ namespace LSW {
 					timar = al_create_timer(1.0 / gr->collision_tps);
 					al_register_event_source(ev_qu, al_get_timer_event_source(timar));
 					al_start_timer(timar);
-				}*/
+				}
 
 				if (ev_qu && timar)
 				{
@@ -2488,6 +2571,16 @@ namespace LSW {
 				{
 					dat->lastkeykeep = dat->ev.keyboard.keycode;
 				}
+			}
+		}
+
+		void fixProportion(int& u, int& v, const float d) {
+			float temp_f = 1.0* v / u;
+			if (temp_f > d) {
+				u = v * 16.0 / 9;
+			}
+			else {
+				v = u * 9.0 / 16;
 			}
 		}
 
@@ -2622,13 +2715,6 @@ namespace LSW {
 				break;
 			}
 			return ch;
-		}
-
-
-
-		const lsw_color color(const float r, const float g, const float b, const float a = 1.0)
-		{
-			return color(r, g, b, a);
 		}
 	}
 }

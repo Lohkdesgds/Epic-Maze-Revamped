@@ -75,6 +75,15 @@ namespace LSW {
 
 		// ********************************** //
 
+		struct lsw_mode {
+			int x = 0;
+			int y = 0;
+			int hz = 0;
+		};
+		struct lsw_modes_all {
+			std::vector<lsw_mode> modes;
+			int using_rn = 0;
+		};
 
 		struct gameplay_needs {
 			bool being_made = true;
@@ -85,8 +94,10 @@ namespace LSW {
 			infinity_map* map2 = nullptr;
 
 			std::thread* collision_controller = nullptr;
-			int istestingcollision = -1;
-			int main_asks_for_pause = 0;
+			/*int istestingcollision = -1;
+			int main_asks_for_pause = 0;*/
+			int beingusedby = -1;
+			std::mutex change_oneanother;
 			double collision_tps = 0.0;
 
 			clock_t now = 0;
@@ -125,6 +136,7 @@ namespace LSW {
 		};
 
 		struct displayer_data {
+			lsw_modes_all modes;
 			lsw_display display = nullptr;
 			lsw_texture buffer = nullptr;
 			lsw_color color_blend = color(1.0, 1.0, 1.0, 1.0);
@@ -187,6 +199,7 @@ namespace LSW {
 			const double _ang_dif(const double, const double);
 			void fixFPS(const double, const double, const double);
 
+			const bool loadModes(const int);
 		public:
 			void _thr_collision_work(gameplay_needs&);
 			const bool init();
@@ -210,5 +223,6 @@ namespace LSW {
 		void _thr_keyboard(event_mng_data*);
 
 		const char translate_al(const int);
+		void fixProportion(int&, int&, const float = 16.0 / 9);
 	}
 }

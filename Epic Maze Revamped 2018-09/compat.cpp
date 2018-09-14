@@ -134,11 +134,23 @@ const sf::Color color(const float r, const float g, const float b, const float a
 
 const double getTime()
 {
-	static ULONGLONG befor = GetTickCount64(); // ms
-	return 0.001*(GetTickCount64() - befor);
+	/*static LARGE_INTEGER v;
+	LARGE_INTEGER rn, freq;
+	if (v.QuadPart == 0) QueryPerformanceCounter(&v);
+	QueryPerformanceCounter(&rn);
+	QueryPerformanceFrequency(&freq);
+	double diff = fabs((rn.QuadPart - v.QuadPart) * 1000.0 /freq.QuadPart);
+	return diff;*/
+
+	auto now = std::chrono::system_clock::now();
+	auto now_ms = std::chrono::time_point_cast<std::chrono::microseconds>(now);
+
+	auto value = now_ms.time_since_epoch();
+
+	return 0.000001 * value.count();
 }
 void restFor(const double t)
 {
-	ULONGLONG now = GetTickCount64();
-	while (GetTickCount64() - now < t*1000.0);
+	double now = getTime();
+	while (getTime() - now < t);
 }
