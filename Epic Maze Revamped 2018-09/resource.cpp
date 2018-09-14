@@ -6,17 +6,23 @@ namespace LSW {
 
 		controller_params controller::data;
 
-		const bool bitmap::load(const images_available o)
+		const bool bitmap::load(const images_available o, const bool force_reload)
 		{
-			if (lastopt != -1) return false;
+			if (lastopt != -1 && !force_reload) return false;
+			if (force_reload) {
+				if (file) this->freeup();
+			}
 			lastopt = o;
 			occured = LSW_AS_BMP;
 			file = (void*)al_load_bitmap(images_paths[o].c_str());
 			return true;
 		}
-		const bool bitmap::load(const fonts_available o, const float fontsiz)
+		const bool bitmap::load(const fonts_available o, const float fontsiz, const bool force_reload)
 		{
-			//if (lastopt != -1) return false;
+			if (lastopt != -1 && !force_reload) return false;
+			if (force_reload) {
+				if (file) this->freeup();
+			}
 			lastopt = o;
 			occured = LSW_AS_FONT;
 			file = (void*)al_load_ttf_font(fonts_paths[o].c_str(), fontsiz, 0);
@@ -31,11 +37,13 @@ namespace LSW {
 		{
 			if (file) {
 				if (occured == LSW_AS_BMP) {
-					al_destroy_bitmap((ALLEGRO_BITMAP*)file);
+					lsw_texture tt = (lsw_texture)file;
+					freeUp(tt);
 					file = nullptr;
 				}
 				else {
-					al_destroy_font((ALLEGRO_FONT*)file);
+					lsw_font tt = (lsw_font)file;
+					freeUp(tt);
 					file = nullptr;
 				}
 			}
@@ -81,7 +89,7 @@ namespace LSW {
 			}
 			return false;
 		}
-		const bool controller::load(const images_available o)
+		const bool controller::load(const images_available o, const bool force_reload)
 		{
 			data.access.lock();
 			bitmap* thus = nullptr;
@@ -89,63 +97,11 @@ namespace LSW {
 			{
 				return false;
 			}
-			bool done = thus->load(o);
+			bool done = thus->load(o, force_reload);
 			data.access.unlock();	
 			return done;
 		}
-		const bool controller::load(const image_groups o)
-		{
-			switch (o)
-			{
-			case LSW_BASICS_DEFAULT_LOAD:
-				if (!load(LSW_BMP_VIGNETTE)) return false;
-				if (!load(LSW_BMP_INTRO)) return false;
-				break;
-			case LSW_MENU_DEFAULT_LOAD:
-				if (!load(LSW_BMP_MENU_BLOCK)) return false;
-				if (!load(LSW_BMP_MENU_OPT_01)) return false;
-				if (!load(LSW_BMP_MENU_OPT_02)) return false;
-				if (!load(LSW_BMP_MENU_OPT_03)) return false;
-				if (!load(LSW_BMP_MENU_OPT_04)) return false;
-				break;
-			case LSW_MENU_INSTRUCTIONS_LOAD:
-				if (!load(LSW_BMP_MENU_BLOCK)) return false;
-				if (!load(LSW_BMP_INSTR)) return false;
-				break;
-			case LSW_MENU_RECORDS_LOAD:
-				if (!load(LSW_BMP_MENU_BLOCK)) return false;
-				if (!load(LSW_BMP_REC_BACK)) return false;
-				break;
-			case LSW_MENU_CONFIG_OCULT:
-				if (!load(LSW_BMP_MENU_BLOCK)) return false;
-				break;
-			case LSW_MENU_START_LOAD:
-				if (!load(LSW_BMP_MENU_BLOCK)) return false;
-				if (!load(LSW_BMP_MENU_OPT_01_S)) return false;
-				if (!load(LSW_BMP_MENU_OPT_02_S)) return false;
-				if (!load(LSW_BMP_MENU_OPT_03_S)) return false;
-				break;
-			case LSW_PAUSE_MENU_LOAD:
-				if (!load(LSW_BMP_PAUSE_CONTINUE)) return false;
-				if (!load(LSW_BMP_PAUSE_EXIT)) return false;
-				for (int u = LSW_BMP_PAUSE_00; u <= LSW_BMP_PAUSE_29; u++)
-				{
-					if (!load((const images_available)u)) return false;
-				}
-				break;
-			case LSW_GAME_LOAD:
-				if (!load(LSW_BMP_MENU_BLOCK)) return false;
-				if (!load(LSW_BMP_BLOCK)) return false;
-				if (!load(LSW_BMP_BLOCK_END)) return false;
-				if (!load(LSW_BMP_PERSON)) return false;
-				if (!load(LSW_BMP_PERSON_F01)) return false;
-				if (!load(LSW_BMP_PERSON_F02)) return false;
-				if (!load(LSW_BMP_SAVING_SCORE)) return false;
-				break;
-			}
-			return true;
-		}
-		const bool controller::load(const fonts_available o, const float s)
+		const bool controller::load(const fonts_available o, const float s, const bool force_reload)
 		{
 			data.access.lock();
 			bitmap* thus = nullptr;
@@ -153,7 +109,7 @@ namespace LSW {
 			{
 				return false;
 			}
-			bool done = thus->load(o, s);
+			bool done = thus->load(o, s, force_reload);
 			data.access.unlock();
 			return done;
 		}
@@ -178,57 +134,6 @@ namespace LSW {
 
 			data.access.unlock();
 		}
-		void controller::unload(const image_groups o)
-		{
-			switch (o)
-			{
-			case LSW_BASICS_DEFAULT_LOAD:
-				unload(LSW_BMP_VIGNETTE);
-				unload(LSW_BMP_INTRO);
-				break;
-			case LSW_MENU_DEFAULT_LOAD:
-				unload(LSW_BMP_MENU_OPT_01);
-				unload(LSW_BMP_MENU_OPT_02);
-				unload(LSW_BMP_MENU_OPT_03);
-				unload(LSW_BMP_MENU_OPT_04);
-				unload(LSW_BMP_MENU_BLOCK);
-				break;
-			case LSW_MENU_INSTRUCTIONS_LOAD:
-				unload(LSW_BMP_INSTR);
-				unload(LSW_BMP_MENU_BLOCK);
-				break;
-			case LSW_MENU_RECORDS_LOAD:
-				unload(LSW_BMP_REC_BACK);
-				unload(LSW_BMP_MENU_BLOCK);
-				break;
-			case LSW_MENU_CONFIG_OCULT:
-				unload(LSW_BMP_MENU_BLOCK);
-				break;
-			case LSW_MENU_START_LOAD:
-				unload(LSW_BMP_MENU_OPT_01_S);
-				unload(LSW_BMP_MENU_OPT_02_S);
-				unload(LSW_BMP_MENU_OPT_03_S);
-				unload(LSW_BMP_MENU_BLOCK);
-				break;
-			case LSW_PAUSE_MENU_LOAD:
-				unload(LSW_BMP_PAUSE_CONTINUE);
-				unload(LSW_BMP_PAUSE_EXIT);
-				for (int u = LSW_BMP_PAUSE_00; u <= LSW_BMP_PAUSE_29; u++)
-				{
-					unload((const images_available)u);
-				}
-				break;
-			case LSW_GAME_LOAD:
-				unload(LSW_BMP_BLOCK);
-				unload(LSW_BMP_MENU_BLOCK);
-				unload(LSW_BMP_PERSON);
-				unload(LSW_BMP_PERSON_F01);
-				unload(LSW_BMP_PERSON_F02);
-				unload(LSW_BMP_SAVING_SCORE);
-				unload(LSW_BMP_BLOCK_END);
-				break;
-			}
-		}
 		void controller::unload(const fonts_available o)
 		{
 			data.access.lock();
@@ -250,7 +155,7 @@ namespace LSW {
 			data.bmps.clear();
 		}
 
-		ALLEGRO_BITMAP* controller::get(const images_available o)
+		lsw_texture controller::get(const images_available o)
 		{
 			data.access.lock();
 			bitmap* thus = nullptr;
@@ -261,9 +166,9 @@ namespace LSW {
 
 			al_convert_memory_bitmaps();
 			data.access.unlock();
-			return (ALLEGRO_BITMAP*)thus->get();
+			return (lsw_texture)thus->get();
 		}
-		ALLEGRO_FONT* controller::get(const fonts_available o)
+		lsw_font controller::get(const fonts_available o)
 		{
 			data.access.lock();
 			bitmap* thus = nullptr;
@@ -273,7 +178,7 @@ namespace LSW {
 			}
 			al_convert_memory_bitmaps();
 			data.access.unlock();
-			return (ALLEGRO_FONT*)thus->get();
+			return (lsw_font)thus->get();
 		}
 		const float mapthing::percof(const int u)
 		{
@@ -301,7 +206,7 @@ namespace LSW {
 			int times, times2;
 			int processtimes = 0;
 			int x, y;
-			double now = al_get_time(); // not useful rn
+			double now = getTime(); // not useful rn
 			bool running = true;
 
 			x = y = times = times2 = 0;
@@ -316,7 +221,7 @@ namespace LSW {
 			for (size_t u = 0; u < (size_t)tamx*tamy; u++) matriz[u] = 0;
 			processtimes = tamx * tamy;
 
-			while (/*al_get_time() - now < sqrt(tamx*tamy)*0.1f*/processtimes > 0 && now != -1 && ((keeprunning) ? *keeprunning : true))
+			while (/*getTime() - now < sqrt(tamx*tamy)*0.1f*/processtimes > 0 && now != -1 && ((keeprunning) ? *keeprunning : true))
 			{
 				if (--processtimes == 0)
 				{
@@ -480,7 +385,7 @@ namespace LSW {
 			tamx = 80 + level * 120;
 			tamy = tty;
 
-			return generate_custom(tamx, tamy, 0.5, keeprunning);
+			return generate_custom(tamx, tamy, 0.56, keeprunning);
 		}
 
 		const bool mapthing::solve()

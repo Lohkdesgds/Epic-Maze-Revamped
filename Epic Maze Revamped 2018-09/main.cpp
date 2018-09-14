@@ -2,50 +2,42 @@
 #include <string>
 #include <vector>
 
+#include "compat.h"
 #include "resource.h"
 #include "display_event.h"
 
-const bool loadAllegro();
 void freezeup();
 
 int main()
 {
+	//getTime(); // set first value
 	LSW::EpicMazeR::displayer maindisp;
 
 	std::cout << "#####[{> EpicMaze Revamped V2 <}]#####" << std::endl;
-	std::cout << "[!] Running on:" << std::endl;
-	system("cd");
 	std::cout << "[!] Loading core..." << std::endl;
 
-	if (!loadAllegro()) {
+	if (!load()) {
 		std::cout << "[!] Failed loading core! (Allegro)" << std::endl;
 		freezeup();
 	}
 
 	std::cout << "[!] Creating display..." << std::endl;
-	maindisp.init();
-
-	maindisp.clearTo(al_map_rgb(0, 0, 0));
-	maindisp.flip();
 
 	std::cout << "[!] Displayer now will think about the display." << std::endl;
 
-	maindisp.think();
+	do
+	{
+		maindisp.deinitAll();
+		maindisp.init();
+
+		maindisp.clearTo(color(0, 0, 0));
+		maindisp.flip();
+
+	}while (maindisp.think() != 0);
 
 	return 0;
 }
 
-const bool loadAllegro()
-{
-	bool main = al_init(); // has to be first, safer.
-	return (main &&
-		al_install_keyboard() &&
-		al_init_image_addon() &&
-		al_init_font_addon() &&
-		al_init_ttf_addon() &&
-		al_init_primitives_addon()
-		);
-}
 void freezeup()
 {
 	int a;

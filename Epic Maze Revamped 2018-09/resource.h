@@ -1,10 +1,6 @@
 #pragma once
+#include "compat.h"
 
-#include <allegro5/allegro5.h>
-#include <allegro5/allegro_image.h>
-#include <allegro5/allegro_font.h>
-#include <allegro5/allegro_ttf.h>
-#include <allegro5/allegro_primitives.h>
 #include <vector>
 #include <mutex>
 #include <string>
@@ -135,7 +131,7 @@ namespace LSW {
 			LSW_AS_BMP,
 			LSW_AS_FONT
 		};
-		enum image_groups {
+		/*enum image_groups {
 			LSW_BASICS_DEFAULT_LOAD,
 			LSW_MENU_DEFAULT_LOAD,
 			LSW_MENU_INSTRUCTIONS_LOAD,
@@ -144,7 +140,7 @@ namespace LSW {
 			LSW_MENU_START_LOAD,
 			LSW_GAME_LOAD,
 			LSW_PAUSE_MENU_LOAD,
-		};
+		};*/
 
 		class bitmap {
 			void* file = nullptr;
@@ -153,8 +149,8 @@ namespace LSW {
 			float lastfontsiz = 0.0;
 			load_modes occured = LSW_AS_BMP;
 		public:
-			const bool load(const images_available);
-			const bool load(const fonts_available, const float = -1.0f);
+			const bool load(const images_available, const bool = false);
+			const bool load(const fonts_available, const float = -1.0f, const bool = false);
 			void* get();
 			//const bool process(); // true if processed (lowered resolution of image) // LATER
 			void freeup();
@@ -172,20 +168,18 @@ namespace LSW {
 			static controller_params data;
 			const bool hasIt(const int /*who*/, const load_modes, bitmap** /*can be nullptr*/ = nullptr, const bool /*force to be load?*/ = true);
 		public:
-			const bool load(const images_available);
-			const bool load(const image_groups);
-			const bool load(const fonts_available, const float);
+			const bool load(const images_available, const bool = false);
+			const bool load(const fonts_available, const float, const bool = false);
 			const bool loadAll();
 			
 			void unload(const images_available);
-			void unload(const image_groups);
 			void unload(const fonts_available);
 			void unloadAll();
 
 			void clearAll();
 
-			ALLEGRO_BITMAP* get(const images_available);
-			ALLEGRO_FONT* get(const fonts_available);
+			lsw_texture get(const images_available);
+			lsw_font get(const fonts_available);
 		};
 
 		struct posicao {

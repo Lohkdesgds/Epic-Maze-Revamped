@@ -1,10 +1,7 @@
 #pragma once
 
-#include <allegro5/allegro5.h>
-#include <allegro5/allegro_image.h>
-#include <allegro5/allegro_font.h>
-#include <allegro5/allegro_ttf.h>
-#include <allegro5/allegro_primitives.h>
+#include "compat.h"
+
 #include <vector>
 #include <mutex>
 #include <string>
@@ -12,7 +9,7 @@
 
 #include "resource.h"
 
-#define VERSION "V2.1A snapshot-1"
+#define VERSION "V2.3A UNIVp-1"
 
 
 // prop == 1 + 7/9
@@ -45,8 +42,8 @@ namespace LSW {
 		};
 
 		struct event_mng_data {
-			ALLEGRO_EVENT_QUEUE* ev_qu = nullptr;
-			ALLEGRO_EVENT ev;
+			lsw_event_qu ev_qu = nullptr;
+			lsw_event ev;
 
 			std::thread* thr = nullptr;
 
@@ -69,7 +66,7 @@ namespace LSW {
 		class event_mng {
 			static event_mng_data data;
 		public:
-			const bool init(ALLEGRO_EVENT_QUEUE*);
+			const bool init(lsw_event_qu);
 			void deinit();
 
 			const bool keepdisplayOn();
@@ -78,15 +75,66 @@ namespace LSW {
 
 		// ********************************** //
 
+
+		struct gameplay_needs {
+			bool being_made = true;
+			int needed_reset = 0;
+			int debug = 0;
+
+			mapthing* map = nullptr;
+			infinity_map* map2 = nullptr;
+
+			std::thread* collision_controller = nullptr;
+			int istestingcollision = -1;
+			int main_asks_for_pause = 0;
+			double collision_tps = 0.0;
+
+			clock_t now = 0;
+			double nowFps = 0.0, nowMult = 0.0;
+			bool playin = true;
+			bool paused = false;
+			bool save_score = true;
+			bool asked_for_help = false;
+
+			int way = -1; // NSWE
+			bool alternative_way[4] = { false };
+			int way_cam = -1;
+			double speed = 0.0;
+			double speed_y = 0.0;
+			double distance_taken = 0.0;
+			double posrel[2] = { -0.9, -0.9 };
+			double plrrot = 0.0;
+
+			double playersiz_rel[2] = { 0.0, 0.0 };
+			double blocksize_rel[2] = { 0.0, 0.0 };
+			//double y_offset = 0.0;
+			bool colided = false;
+			double cases_times_mult = 0.0;
+
+			double time_final[2] = { 0.0 };
+			double final_score = 0.0;
+
+			double min_dist[9][2];
+			bool min_dist_used[9] = { false };
+			double fixed_distance = 1.0;
+
+			double campos[2] = { 0.0, 0.0 };
+			double cammult[2];
+			
+			int key = -1, keykeep = -1, keylost = -1;
+		};
+
 		struct displayer_data {
-			ALLEGRO_DISPLAY* display = nullptr;
-			ALLEGRO_BITMAP* buffer = nullptr;
-			ALLEGRO_BITMAP* transparency = nullptr;
-			ALLEGRO_DISPLAY_MODE full;
-			ALLEGRO_EVENT_QUEUE* ev_qu = nullptr;
+			lsw_display display = nullptr;
+			lsw_texture buffer = nullptr;
+			lsw_color color_blend = color(1.0, 1.0, 1.0, 1.0);
+			lsw_texture transparency = nullptr;
+			int full_a[2] = { 0,0 };
+			lsw_event_qu ev_qu = nullptr;
 			controller data_control;
+			gameplay_needs *if_playin = nullptr;
 			int usedx = 0, usedy = 0;
-			float prop = 0.0;
+			float prop[2] = { 0.0,0.0 };
 
 			bool loaded = false;
 			std::mutex muu;
@@ -94,7 +142,7 @@ namespace LSW {
 			event_mng evm;
 
 			double fps = 0.0;
-			ULONGLONG tickCount = 0;
+			//ULONGLONG tickCount = 0;
 			stats now = LSW_S_INITIALIZING;
 
 			ULONGLONG lastC = 0; // don't use normally
@@ -102,6 +150,9 @@ namespace LSW {
 
 			double anim_posxy_keep = 0.0; // internal
 			double lastdraw = 0.0; // internal
+
+			double fixed_fps = -1;
+			int display_mode_draw = false;
 
 			bool infinite_mode = false;
 		};
@@ -113,10 +164,17 @@ namespace LSW {
 			LSW_P_WEST
 		};
 
+
 		class displayer {
 			static displayer_data data;
-			// bmp, x, y, rot (º), scalex, scaley, boxsiz, cx, cy
-			void drawIt(ALLEGRO_BITMAP*, const double, const double, const double, const double = 1.0, const double = 1.0, const double = -1, double = -1, double = -1, const ALLEGRO_COLOR = al_map_rgb(255, 0, 0));
+
+			int level = 0;
+			bool enabled_alternative_mode = false;
+			bool infinite_map = false;
+			bool isFullscreen = true;
+
+			// bmp, x, y, rot (º), scalex, scaley, boxsiz, cx, cy, blending? (only if no border), bitmap related x, bitmap related y
+			void drawIt(lsw_texture, const double, const double, const double, const double = 1.0, const double = 1.0, const double = -1, double = -1, double = -1, const lsw_color = color(1, 0, 0), const bool = false, const int = -1, const int = -1);
 			void bganim(const double); // you have to call multiplier to work (or its val)! (multiplier == sets right speed!)
 			const int pauseScreenGame();
 
@@ -127,12 +185,13 @@ namespace LSW {
 			const assistance_nsew _whereToTp(const double, const double);
 			// degrees
 			const double _ang_dif(const double, const double);
+			void fixFPS(const double, const double, const double);
 
-			void _thr_collision_work();
 		public:
+			void _thr_collision_work(gameplay_needs&);
 			const bool init();
 
-			void clearTo(const ALLEGRO_COLOR);
+			void clearTo(const lsw_color);
 			const double multiplier();
 			void flip();
 			const double lastFPS();
@@ -140,11 +199,12 @@ namespace LSW {
 
 			void resizeBufTo(const int, const int);
 
-			const bool think();
+			const int think();
 
 			void deinitAll();
 		};
 
+		void _thr_collisionwork_ext(gameplay_needs*, displayer*);
 		void _thr_temp_generatemap(mapthing*, int, int*, bool*, bool*);
 		void _thr_temp_loadallresources(int*, bool*);
 		void _thr_keyboard(event_mng_data*);
