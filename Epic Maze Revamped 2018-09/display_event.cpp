@@ -1238,7 +1238,7 @@ namespace LSW {
 									else mapread = map2.readpos(px, py);
 
 									if (mapread > 0 && data.display_mode_draw == 2) {
-										drawIt(mbl, xx, yy, 0.0, 2.0, 2.0, -1.0, 0.0, 0.0,data.color_blend,true);
+										drawIt(mbl, xx, yy, 0.0, 2.0, 2.0, -1.0, 0.0, 0.0,color(data.color_blend.r*0.2, data.color_blend.g*0.2, data.color_blend.b*0.2, data.color_blend.a*0.2),true);
 									}
 									if (mapread <= 0) {
 
@@ -2253,26 +2253,26 @@ namespace LSW {
 				defineOut(data.display);
 				double d[3][4];
 
-				d[0][0] = 0.002*sin(getTime()*4.1);
-				d[0][1] = 0.002*cos(getTime()*5.9);
-				d[0][2] = 0.002*sin(getTime()*4.7);
-				d[0][3] = 0.002*cos(getTime()*6.4);
+				d[0][0] = 0.003*sin(getTime()*4.1);
+				d[0][1] = 0.003*cos(getTime()*5.9);
+				d[0][2] = 0.003*sin(getTime()*4.7);
+				d[0][3] = 0.003*cos(getTime()*6.4);
 
-				d[1][0] = 0.002*cos(getTime()*2.7);
-				d[1][1] = 0.002*cos(getTime()*3.3);
-				d[1][2] = 0.002*sin(getTime()*4.1);
-				d[1][3] = 0.002*sin(getTime()*5.2);
+				d[1][0] = 0.003*cos(getTime()*2.7);
+				d[1][1] = 0.003*cos(getTime()*3.3);
+				d[1][2] = 0.003*sin(getTime()*4.1);
+				d[1][3] = 0.003*sin(getTime()*5.2);
 
-				d[2][0] = 0.002*cos(getTime()*6.2);
-				d[2][1] = 0.002*sin(getTime()*1.9);
-				d[2][2] = 0.002*sin(getTime()*5.7);
-				d[2][3] = 0.002*cos(getTime()*3.9);
+				d[2][0] = 0.003*cos(getTime()*6.2);
+				d[2][1] = 0.003*sin(getTime()*1.9);
+				d[2][2] = 0.003*sin(getTime()*5.7);
+				d[2][3] = 0.003*cos(getTime()*3.9);
 
 				drawIt(data.buffer, 0, 0, 0, s[0] / data.prop[0], s[1] / data.prop[1], -1, -1, -1, color(var_b*0.75, var_b*0.75, var_b*0.75, var_b*0.75), true, getDisplayWidth(data.display), getDisplayHeight(data.display));
-				drawIt(data.buffer, 0*d[0][0], 0.001*d[0][1], 0, s[0] / data.prop[0] * d[0][2], s[1] / data.prop[1] * d[0][3], -1, -1, -1, color(var_b*0.70, var_b*0.99, var_b*0.99, var_b*0.99), true, getDisplayWidth(data.display), getDisplayHeight(data.display));
-				drawIt(data.buffer, 0*d[1][0], 0.001*d[1][1], 0, s[0] / data.prop[0] * d[1][2], s[1] / data.prop[1] * d[1][3], -1, -1, -1, color(var_b*0.99, var_b*0.70, var_b*0.99, var_b*0.99), true, getDisplayWidth(data.display), getDisplayHeight(data.display));
-				drawIt(data.buffer, 0*d[2][0], 0.001*d[2][1], 0, s[0] / data.prop[0] * d[2][2], s[1] / data.prop[1] * d[2][3], -1, -1, -1, color(var_b*0.99, var_b*0.99, var_b*0.70, var_b*0.99), true, getDisplayWidth(data.display), getDisplayHeight(data.display));
-				drawIt(data.buffer, 0, 0, 0, s[0] / data.prop[0], s[1] / data.prop[1], -1, -1, -1, color(var_b*0.99, var_b*0.99, var_b*0.99, var_b*0.99), true, getDisplayWidth(data.display), getDisplayHeight(data.display));
+				drawIt(data.buffer, d[0][0], d[0][1], 0, (s[0] / data.prop[0]) + d[0][2], (s[1] / data.prop[1]) + d[0][3], -1, -1, -1, color(var_b*0.70, var_b*0.99, var_b*0.99, var_b*0.99), true, getDisplayWidth(data.display), getDisplayHeight(data.display));
+				drawIt(data.buffer, d[1][0], d[1][1], 0, (s[0] / data.prop[0]) + d[1][2], (s[1] / data.prop[1]) + d[1][3], -1, -1, -1, color(var_b*0.99, var_b*0.70, var_b*0.99, var_b*0.99), true, getDisplayWidth(data.display), getDisplayHeight(data.display));
+				drawIt(data.buffer, d[2][0], d[2][1], 0, (s[0] / data.prop[0]) + d[2][2], (s[1] / data.prop[1]) + d[2][3], -1, -1, -1, color(var_b*0.99, var_b*0.99, var_b*0.70, var_b*0.99), true, getDisplayWidth(data.display), getDisplayHeight(data.display));
+				drawIt(data.buffer, 0, 0, 0, s[0] / data.prop[0], s[1] / data.prop[1], -1, -1, -1, color(var_b*0.95, var_b*0.95, var_b*0.99, var_b*0.95), true, getDisplayWidth(data.display), getDisplayHeight(data.display));
 
 				/*al_draw_tinted_scaled_bitmap(data.buffer,
 					color(var_b*0.75, var_b*0.75, var_b*0.75, var_b*0.75),
