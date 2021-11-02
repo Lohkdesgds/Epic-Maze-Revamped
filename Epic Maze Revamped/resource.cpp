@@ -187,7 +187,7 @@ namespace LSW {
 			ULONG numof_u = 0;
 			ULONG numof_others = 0;
 
-			for (ULONG p = 0; p < tamx*tamy; p++)
+			for (ULONG p = 0; p < static_cast<unsigned long>(tamx*tamy); p++)
 			{
 				if (matriz[p] == u) numof_u++;
 				else numof_others++;
@@ -217,7 +217,7 @@ namespace LSW {
 				delete matriz;
 				matriz = nullptr;
 			}
-			matriz = new int[tamx*tamy];
+			matriz = new int[static_cast<size_t>(tamx * tamy)];
 			for (size_t u = 0; u < (size_t)tamx*tamy; u++) matriz[u] = 0;
 			processtimes = tamx * tamy;
 
@@ -392,7 +392,7 @@ namespace LSW {
 		{
 			int maximo_tentativas, ultimo;
 			posicao *visitados;
-			visitados = new posicao[tamx*tamy];
+			visitados = new posicao[static_cast<size_t>(tamx * tamy)];
 			posicao atual;
 
 			atual.x = 0;
@@ -441,7 +441,7 @@ namespace LSW {
 					return false;
 				}
 			}
-			delete visitados;
+			delete[] visitados;
 			return true;
 		}
 
